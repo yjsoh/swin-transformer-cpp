@@ -40,9 +40,18 @@ int main() {
         shift_window_transformer::Tensor<data_t> input(3 * 224 * 224, 0);
         input.shape = {3, 224, 224};
         shift_window_transformer::Tensor<data_t> output{};
+
+		struct timespec begin, end;
+		clock_gettime(CLOCK_REALTIME, &begin);
         swin_t->forward(input, output);
+		clock_gettime(CLOCK_REALTIME, &end);
+
+		long seconds = end.tv_sec - begin.tv_sec;
+    	long nanoseconds = end.tv_nsec - begin.tv_nsec;
+
         delete swin_t;
         std::cout << "Ok" << std::endl;
+		printf("%10ld s %10ld ns\n", seconds, nanoseconds);
     } catch (...) {
         std::cout << "Error" << std::endl;
     }
