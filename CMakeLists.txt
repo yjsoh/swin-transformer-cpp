@@ -8,3 +8,6 @@ include_directories(model)
 include(CTest)
 
 add_executable(swin_transformer_cpp main.cpp)
+
+add_executable(swin_pmem main.cpp)
+target_compile_options(swin_pmem PUBLIC -lpmem -D_PERSISTENT_TENSOR)
