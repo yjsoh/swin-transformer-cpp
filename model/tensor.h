@@ -7,6 +7,10 @@
 
 #include <bits/stdc++.h>
 
+#include <libpmem.h>
+#ifdef _PERSISTENT_TENSOR
+	void *pop = nullptr, *now;
+#endif
 namespace shift_window_transformer {
     typedef std::vector<int> TensorShape;
 
@@ -22,6 +26,31 @@ namespace shift_window_transformer {
         }
 
         TensorShape shape;
+
+#ifdef _PERSISTENT_TENSOR
+		void * operator new(size_t size) {
+			if(pop == nullptr)
+			{
+				pop = pmem_map_file("/mnt/ramdisk/swin", (1 << 30), PMEM_FILE_CREATE, 0x660, NULL, NULL);
+				if(pop == NULL)
+				{
+					perror("pmem_map_file");
+					return pop;
+				}
+				now = pop;
+			}
+
+			void *toRet = now;
+			now = (void*) (((char*) now) + size);
+			std::cout << "Allocating on PMEM " << size << " @ " << toRet << std::endl;
+			return toRet;
+		}
+
+		void operator delete(void *p)
+		{
+			std::cout << "Free PMEM: " << p << std::endl;
+		}
+#endif
 
         friend std::ostream &operator<<(std::ostream &os, const Tensor<T> &vec) {
             int cnt = 1;
